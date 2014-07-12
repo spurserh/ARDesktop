@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="freeglut\include"
+				AdditionalIncludeDirectories="freeglut\include;C:\OculusSDK\LibOVR\include;C:\Development"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -61,8 +61,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="libovrd.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="freeglut\lib"
+				AdditionalLibraryDirectories="freeglut\lib;C:\OculusSDK\LibOVR\Lib\Win32"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -116,6 +117,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories="freeglut\include;C:\Development;C:\OculusSDK\LibOVR\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -134,7 +136,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="libovr.lib"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories="freeglut\lib;C:\OculusSDK\LibOVR\Lib\Win32"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"

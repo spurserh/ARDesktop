@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <assert.h>
 
+using namespace Common;
+
 HDC hScreenDC = 0, hMemoryDC = 0;
 HBITMAP hBitmap = 0;
 
@@ -62,7 +64,7 @@ bool ScreenCapture_Init()
 	return true;
 }
 
-bool ScreenCapture_ToTexture(GLuint desktop_tex_id, float *x_scale, float *y_scale)
+bool ScreenCapture_ToTexture(GLuint desktop_tex_id, float *screen_aspect, Vec2f *tex_extent)
 {
 	// get a new bitmap
 	HBITMAP hOldBitmap = (HBITMAP)SelectObject(hMemoryDC, hBitmap);
@@ -78,8 +80,8 @@ bool ScreenCapture_ToTexture(GLuint desktop_tex_id, float *x_scale, float *y_sca
 			   screen_width * 4);
 	}
 
-	*x_scale = float(screen_width) / float(texture_width);
-	*y_scale = float(screen_height) / float(texture_height);
+	*screen_aspect = float(screen_width) / float(screen_height);
+	*tex_extent = Vec2f(float(screen_width) / float(texture_width), float(screen_height) / float(texture_height));
 
 	glBindTexture(GL_TEXTURE_2D, desktop_tex_id);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture_width, texture_height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, (void*)texture_data);

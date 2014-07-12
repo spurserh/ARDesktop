@@ -11,3 +11,14 @@ Debug/main.obj
 Debug/mt.dep
 Debug/ScreenCapture.obj
 Debug/vc90.idb
+Debug/Common.lib
+Debug/Common.bsc
+Public_Release/Common.lib
+Release/ARDesktop.exe
+Release/ARDesktop.exe.intermediate.manifest
+Release/BuildLog.htm
+Release/main.obj
+Release/mt.dep
+Release/ScreenCapture.obj
+Release/vc90.idb
+ARDesktop.suo
