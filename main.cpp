@@ -54,7 +54,6 @@ void DrawDesktopEye(Vec3f const&eye,
 					Vec2f const&tex_extent) {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	//gluOrtho2D(0, 1, 1, 0);
 	gluPerspective(60.0, // fov
 				   //0.5f * float(m_hmdInfo.HResolution) / float(m_hmdInfo.VResolution),
 				   0.5f * window_width / window_height,
