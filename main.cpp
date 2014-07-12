@@ -18,11 +18,12 @@ unsigned ovrvision_tex_ids[2] = {0, 0};
 // 15 inches
 float world_screen_width_meters = 0.381f;
 float world_meters_per_unit = world_screen_width_meters / 2.0f;
-float desktop_ipd_adjust = 2.859;
+float desktop_ipd_adjust = 1.959;
 
 float ovrvision_intra_ocular_offset_norm = 0.238f;
 
-float desktop_alpha = 0.6f;
+float desktop_z = -2.28;
+float desktop_alpha = 0.9f;
 
 int window_width = 1, window_height = 1;
 
@@ -83,7 +84,7 @@ void DrawDesktopEye(Vec3f const&eye,
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glBindTexture(GL_TEXTURE_2D, desktop_tex_id);
-	glTranslatef(0,0,-4);
+	glTranslatef(0,0,desktop_z);
 	glColor4f(1,1,1,desktop_alpha);
 	glBegin(GL_QUADS);
 	glTexCoord2f(0,tex_extent.y);
@@ -210,9 +211,14 @@ void keyboard(unsigned char key, int x, int y)
 		desktop_ipd_adjust -= 0.03f;
 	else if(key == '\'')
 		desktop_ipd_adjust += 0.03f;
+	else if(key == '=')
+		desktop_z -= 0.01f;
+	else if(key == '-')
+		desktop_z += 0.01f;
 
 	fprintf(stderr, "ovrvision_intra_ocular_offset_norm %f\n" , ovrvision_intra_ocular_offset_norm);
 	fprintf(stderr, "desktop_ipd_adjust %f\n", desktop_ipd_adjust);
+	fprintf(stderr, "desktop_z %f\n", desktop_z);
 }
 
 GLuint MakeTexture() 

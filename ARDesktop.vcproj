@@ -117,7 +117,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="freeglut\include;C:\Development;C:\OculusSDK\LibOVR\include"
+				AdditionalIncludeDirectories="freeglut\include;C:\Development;C:\OculusSDK\LibOVR\include;ovrvision\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -136,9 +136,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libovr.lib"
+				AdditionalDependencies="libovr.lib ovrvision.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="freeglut\lib;C:\OculusSDK\LibOVR\Lib\Win32"
+				AdditionalLibraryDirectories="freeglut\lib;C:\OculusSDK\LibOVR\Lib\Win32;ovrvision\bin\x86"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"

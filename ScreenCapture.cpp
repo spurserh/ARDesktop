@@ -72,6 +72,28 @@ bool ScreenCapture_ToTexture(GLuint desktop_tex_id, float *screen_aspect, Vec2f 
 	HBITMAP hOldBitmap = (HBITMAP)SelectObject(hMemoryDC, hBitmap);
 
 	BitBlt(hMemoryDC, 0, 0, screen_width, screen_height, hScreenDC, 0, 0, SRCCOPY);
+
+	// Cursor
+	{
+		//Draw the cursor
+		CURSORINFO m_GlobalCursor;
+		m_GlobalCursor.cbSize = sizeof(CURSORINFO);
+		int m_intCursorWidth = GetSystemMetrics(SM_CXCURSOR);
+		int m_intCursorHeight = GetSystemMetrics(SM_CYCURSOR);
+		GetCursorInfo(&m_GlobalCursor);
+		if (m_GlobalCursor.flags == CURSOR_SHOWING)	{
+			ICONINFO CursorInfo;
+			GetIconInfo((HICON)m_GlobalCursor.hCursor, &CursorInfo);
+			DrawIconEx(hMemoryDC,
+					   int((m_GlobalCursor.ptScreenPos.x - CursorInfo.xHotspot)), int((m_GlobalCursor.ptScreenPos.y - CursorInfo.yHotspot)),
+					   m_GlobalCursor.hCursor,
+					   int(m_intCursorWidth), int(m_intCursorHeight),
+					   0, NULL, DI_COMPAT | DI_NORMAL);		
+			DeleteObject(CursorInfo.hbmColor);
+			DeleteObject(CursorInfo.hbmMask);
+		}
+	}
+
 	hBitmap = (HBITMAP)SelectObject(hMemoryDC, hOldBitmap);
 
 	GetDIBits(hMemoryDC, hBitmap, 0, screen_height, (LPVOID)screen_data, (BITMAPINFO*)&bmi, DIB_RGB_COLORS);
