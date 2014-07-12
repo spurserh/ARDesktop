@@ -18,8 +18,9 @@ unsigned ovrvision_tex_ids[2] = {0, 0};
 // 15 inches
 float world_screen_width_meters = 0.381f;
 float world_meters_per_unit = world_screen_width_meters / 2.0f;
+float desktop_ipd_adjust = 2.859;
 
-float ovrvision_intra_ocular_offset_norm = 0.28f;
+float ovrvision_intra_ocular_offset_norm = 0.238f;
 
 int window_width = 1, window_height = 1;
 
@@ -77,7 +78,7 @@ void DrawDesktopEye(Vec3f const&eye,
 			  );
 
 	glBindTexture(GL_TEXTURE_2D, desktop_tex_id);
-	glTranslatef(0,0,-2);
+	glTranslatef(0,0,-4);
 	glColor4f(1,1,1,1);
 	glBegin(GL_QUADS);
 	glTexCoord2f(0,tex_extent.y);
@@ -155,7 +156,7 @@ void display()
 	Vec3f up(0,1,0);
 	up = Multiply(yaw_matrix, Multiply(pitch_matrix, Multiply(roll_matrix, up)));
 
-	const float ipd_world_units = m_hmdInfo.InterpupillaryDistance / world_meters_per_unit;
+	const float ipd_world_units = desktop_ipd_adjust * m_hmdInfo.InterpupillaryDistance / world_meters_per_unit;
 
 	Vec3f left_eye(-ipd_world_units / 2.0f,0,0);
 	Vec3f right_eye(ipd_world_units / 2.0f,0,0);
@@ -195,11 +196,16 @@ void reshape(int w, int h)
 void keyboard(unsigned char key, int x, int y)
 {
 	if(key == '[')
-		ovrvision_intra_ocular_offset_norm -= 0.01f;
+		ovrvision_intra_ocular_offset_norm -= 0.002f;
 	else if(key == ']')
-		ovrvision_intra_ocular_offset_norm += 0.01f;
+		ovrvision_intra_ocular_offset_norm += 0.002f;
+	else if(key == ';')
+		desktop_ipd_adjust -= 0.03f;
+	else if(key == '\'')
+		desktop_ipd_adjust += 0.03f;
 
 	fprintf(stderr, "ovrvision_intra_ocular_offset_norm %f\n" , ovrvision_intra_ocular_offset_norm);
+	fprintf(stderr, "desktop_ipd_adjust %f\n", desktop_ipd_adjust);
 }
 
 GLuint MakeTexture() 
