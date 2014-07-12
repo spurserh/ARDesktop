@@ -22,6 +22,8 @@ float desktop_ipd_adjust = 2.859;
 
 float ovrvision_intra_ocular_offset_norm = 0.238f;
 
+float desktop_alpha = 0.6f;
+
 int window_width = 1, window_height = 1;
 
 // Oculus Rift stuff
@@ -77,9 +79,12 @@ void DrawDesktopEye(Vec3f const&eye,
 			  up.x,up.y,up.z // up
 			  );
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	glBindTexture(GL_TEXTURE_2D, desktop_tex_id);
 	glTranslatef(0,0,-4);
-	glColor4f(1,1,1,1);
+	glColor4f(1,1,1,desktop_alpha);
 	glBegin(GL_QUADS);
 	glTexCoord2f(0,tex_extent.y);
 	glVertex2f(-screen_aspect,-1);
@@ -106,6 +111,8 @@ void DrawCameraEye(float eye_x_coeff, GLuint tex_id, float screen_aspect, float 
 
 	float y_scale = screen_aspect / image_aspect;
 	glScalef(1,y_scale,1);
+
+	glDisable(GL_BLEND);
 
 	glBindTexture(GL_TEXTURE_2D, tex_id);
 	glColor4f(1,1,1,1);

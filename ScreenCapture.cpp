@@ -80,6 +80,9 @@ bool ScreenCapture_ToTexture(GLuint desktop_tex_id, float *screen_aspect, Vec2f 
 		memcpy(texture_data + height * texture_width * 4,
 			   screen_data + height * screen_width * 4,
 			   screen_width * 4);
+		// Fill in alpha = 1.0
+		for(int width=0;width<screen_width;++width)
+			texture_data[(height * texture_width + width) * 4 + 3] = 255;
 	}
 
 	*screen_aspect = float(screen_width) / float(screen_height);
