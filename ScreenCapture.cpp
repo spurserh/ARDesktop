@@ -22,10 +22,12 @@ BITMAPINFOHEADER bmi;
 char *screen_data = 0;
 char *texture_data = 0;
 
+namespace {
 int NextPOT(int x) {
 	int ret = 1;
-	for(;ret<screen_width;ret*=2);
+	for(;ret<x;ret*=2);
 	return ret;
+}
 }
 
 bool ScreenCapture_Init()

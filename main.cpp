@@ -1,6 +1,7 @@
 
 #include "GL/freeglut.h"
 #include "ScreenCapture.h"
+#include "StereoCamera.h"
 #include "Common/Types.h"
 
 #include <stdio.h>
@@ -11,9 +12,14 @@ using namespace Common;
 
 unsigned desktop_tex_id = 0;
 
+// Left/right
+unsigned ovrvision_tex_ids[2] = {0, 0};
+
 // 15 inches
 float world_screen_width_meters = 0.381f;
 float world_meters_per_unit = world_screen_width_meters / 2.0f;
+
+float ovrvision_intra_ocular_offset_norm = 0.28f;
 
 int window_width = 1, window_height = 1;
 
@@ -51,12 +57,13 @@ void DrawDesktopEye(Vec3f const&eye,
 					Vec3f const&dir,
 					Vec3f const&up,
 					float screen_aspect,
+					float one_eye_aspect,
 					Vec2f const&tex_extent) {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(60.0, // fov
 				   //0.5f * float(m_hmdInfo.HResolution) / float(m_hmdInfo.VResolution),
-				   0.5f * window_width / window_height,
+				   one_eye_aspect,
 				   0.1, 100.0);
 				   
 	glMatrixMode(GL_MODELVIEW);
@@ -87,6 +94,35 @@ void DrawDesktopEye(Vec3f const&eye,
 	glEnd();
 }
 
+void DrawCameraEye(float eye_x_coeff, GLuint tex_id, float screen_aspect, float image_aspect, Vec2f const&tex_extent) {
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluOrtho2D(-1,1,-1,1);
+				   
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glTranslatef(ovrvision_intra_ocular_offset_norm * eye_x_coeff,0,0);
+
+	float y_scale = screen_aspect / image_aspect;
+	glScalef(1,y_scale,1);
+
+	glBindTexture(GL_TEXTURE_2D, tex_id);
+	glColor4f(1,1,1,1);
+	glBegin(GL_QUADS);
+	glTexCoord2f(0,tex_extent.y);
+	glVertex2f(-1,-1);
+
+	glTexCoord2f(tex_extent.x,tex_extent.y);
+	glVertex2f(1,-1);
+
+	glTexCoord2f(tex_extent.x, 0);
+	glVertex2f(1,1);
+
+	glTexCoord2f(0,0);
+	glVertex2f(-1,1);
+	glEnd();
+}
+
 void display()
 {
 	float screen_aspect;
@@ -94,6 +130,14 @@ void display()
 	if(!ScreenCapture_ToTexture(desktop_tex_id, &screen_aspect, &tex_extent))
 	{
 		fprintf(stderr, "Warning: ScreenCapture_ToTexture() failed\n");
+		return;
+	}
+
+	float camera_image_aspect;
+	Vec2f camera_tex_extent;
+	if(!StereoCamera_ToTextures(ovrvision_tex_ids[0], ovrvision_tex_ids[1], &camera_image_aspect, &camera_tex_extent))
+	{
+		fprintf(stderr, "Warning: StereoCamera_ToTextures() failed\n");
 		return;
 	}
 
@@ -122,12 +166,16 @@ void display()
 	glClearColor(1,0,1,1);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	// TODO: Ovrvision
+	const float one_eye_aspect = 0.5f * window_width / window_height;
 
+	// Draw the desktop with the real world behind
 	glViewport(0,0,window_width / 2,window_height);
-	DrawDesktopEye(left_eye, dir, up, screen_aspect, tex_extent);
+	DrawCameraEye(1.0f, ovrvision_tex_ids[0], one_eye_aspect, camera_image_aspect, camera_tex_extent);
+	DrawDesktopEye(left_eye, dir, up, screen_aspect, one_eye_aspect, tex_extent);
+
 	glViewport(window_width / 2,0,window_width / 2,window_height);
-	DrawDesktopEye(right_eye, dir, up, screen_aspect, tex_extent);
+	DrawCameraEye(-1.0f, ovrvision_tex_ids[1], one_eye_aspect, camera_image_aspect, camera_tex_extent);
+	DrawDesktopEye(right_eye, dir, up, screen_aspect, one_eye_aspect, tex_extent);
 
 	glutSwapBuffers();
 }
@@ -144,9 +192,35 @@ void reshape(int w, int h)
 	window_height = h;
 }
 
+void keyboard(unsigned char key, int x, int y)
+{
+	if(key == '[')
+		ovrvision_intra_ocular_offset_norm -= 0.01f;
+	else if(key == ']')
+		ovrvision_intra_ocular_offset_norm += 0.01f;
+
+	fprintf(stderr, "ovrvision_intra_ocular_offset_norm %f\n" , ovrvision_intra_ocular_offset_norm);
+}
+
+GLuint MakeTexture() 
+{
+	GLuint ret = 0;
+	glEnable(GL_TEXTURE_2D);
+	glGenTextures(1, &ret);
+	glBindTexture(GL_TEXTURE_2D, ret);
+	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	return ret;
+}
+
 int main(int argc, char **argv)
 {
 	if(!InitRift())
+		return 1;
+
+	if(!StereoCamera_Init())
 		return 1;
 
 	if(!ScreenCapture_Init())
@@ -159,15 +233,12 @@ int main(int argc, char **argv)
 	glutCreateWindow("ARDesktop");
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
+	glutKeyboardFunc(keyboard);
 	glutIdleFunc(idle);
 
-	glGenTextures(1, &desktop_tex_id);
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, desktop_tex_id);
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	desktop_tex_id = MakeTexture();
+	ovrvision_tex_ids[0] = MakeTexture();
+	ovrvision_tex_ids[1] = MakeTexture();
 
 	glutMainLoop();
 	return 0;
