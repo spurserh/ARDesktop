@@ -1,0 +1,13 @@
+*.ncb
+*.user
+Debug/ARDesktop.exe.embed.manifest
+Debug/ARDesktop.exe.embed.manifest.res
+Debug/ARDesktop.exe.intermediate.manifest
+*.ilk
+*.pdb
+Debug/BuildLog.htm
+Debug/ARDesktop.exe
+Debug/main.obj
+Debug/mt.dep
+Debug/ScreenCapture.obj
+Debug/vc90.idb
